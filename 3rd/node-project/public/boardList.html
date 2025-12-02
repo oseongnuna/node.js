@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h3>게시글목록</h3>
+    <table border="1">
+      <thead>
+        <tr>
+          <th>글번호</th>
+          <th>제목</th>
+          <th>작성자</th>
+          <th>작성일자</th>
+          <th>이미지</th>
+        </tr>
+      </thead>
+      <tbody id="blist">
+        <!-- 여기에 동적으로 데이터가 추가됩니다 -->
+      </tbody>
+    </table>
+
+    <script>
+      // fetch 활용
+      document.addEventListener("DOMContentLoaded", async () => {
+        await loadRecords();
+      });
+
+      async function loadRecords() {
+        const response = await fetch(`/board/boards`);
+        const data = await response.json();
+        console.log(data);
+        renderRecords(data);
+      }
+
+      let currentRecords = [];
+
+      function renderRecords(records) {
+        if (!records || !records.length) return;
+
+        currentRecords = records;
+
+        const tbody = document.querySelector("table tbody");
+        tbody.innerHTML = "";
+
+        records.forEach((record) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+          <td>${record.board_id}</td>
+          <td>${record.title}</td>
+          <td>${record.author}</td>
+          <td>${new Date(record.create_date).toLocaleString()}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+    </script>
+  </body>
+</html>

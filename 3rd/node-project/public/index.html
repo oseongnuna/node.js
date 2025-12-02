@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h3>파일업로드</h3>
+    <div class="board">
+      <!-- localhost:3000/index.html -->
+      <!-- localhost:3000/board/board -->
+      <!-- localhost:3000/board/board?title=제목1&content=글쓰기연습$author=user01&img= -->
+      <form action="board/board" class="addBoard" method="post">
+        제목: <input type="text" name="title" /><br />
+        내용: <textarea name="content"></textarea><br />
+        작성자: <input type="text" name="author" /><br />
+        파일: <input type="file" name="img" /><br />
+        <input type="submit" value="등록" />
+      </form>
+    </div>
+
+    <h3>FormData활용</h3>
+    <div class="multipart">
+      <form
+        action="board/board"
+        class="multipart"
+        method="post"
+        enctype="multipart/form-data"
+      >
+        제목: <input type="text" name="title" /><br />
+        내용: <textarea name="content"></textarea><br />
+        작성자: <input type="text" name="author" /><br />
+        파일: <input type="file" name="img" /><br />
+        <input type="submit" value="등록" />
+      </form>
+    </div>
+
+    <a href="boardList.html">게시글목록</a>
+
+    <script>
+      // multipart요청 FormData 객체
+      document
+        .querySelector("form.multipart")
+        .addEventListener("submit", (e) => {
+          let file = document.querySelector(
+            'form.multipart input[type="file"]'
+          );
+          e.preventDefault();
+
+          const title = document.querySelector(
+            'form.multipart input[name="title"]'
+          ).value;
+          const content = document.querySelector(
+            'form.multipart textarea[name="content"]'
+          ).value;
+          const author = document.querySelector(
+            'form.multipart input[name="author"]'
+          ).value;
+          if (!title || !content || !author) {
+            alert("필수값 입력");
+            return;
+          }
+          const formData = new FormData(); // form데이터를 처리(multipart)
+          formData.append("title", title);
+          formData.append("content", content);
+          formData.append("author", author);
+          formData.append("img", file.files[0]);
+
+          fetch("board/board", {
+            method: "post",
+            body: formData,
+          })
+            .then((resp) => resp.json())
+            .then((result) => {
+              console.log(result);
+            })
+            .catch((err) => console.log());
+        });
+
+      document
+        .querySelector('input[type="file"]')
+        .addEventListener("change", (e) => {
+          console.log(e.target.files[0]);
+          const file = e.target.files[0]; //binary -> text(base64)
+          filename = file.name; //실제 jpg 파일 이름
+          //파일처리객체
+          const reader = new FileReader();
+          reader.onload = function () {
+            //읽어들일 때 발생하는 이벤트
+            console.log(reader.result); // base64로
+            base64 = reader.result.split(",")[1]; //split() 사용하면 배열로 만들어줌
+          };
+          reader.readAsDataURL(file); // file 읽기
+        });
+
+      //이벤트 대상
+      document
+        .querySelector("form.addBoard")
+        .addEventListener("submit", (e) => {
+          e.preventDefault(); //form의  submit 기능 차단
+          let title = document.querySelector('input[name="title"]').value;
+          let content = document.querySelector(
+            'textarea[name="content"]'
+          ).value;
+          let author = document.querySelector('input[name="author"]').value;
+          if (!title || !content || !author) {
+            alert("필수값 입력");
+            return;
+          }
+
+          // 서버 프로그램 호출
+          let response = fetch("board/board", {
+            method: "post",
+            headers: { "Content-Type": "application/json;charset=utf-8" },
+            body: JSON.stringify({
+              title,
+              content,
+              author,
+              filename,
+              base64,
+            }),
+          })
+            .then((resp) => resp.json())
+            .then((result) => {
+              if (result.retCode == "OK") {
+                alert(result.retMsg);
+              } else {
+                alert(result.retMsg);
+              }
+            });
+        });
+
+      // // 이벤트 대상
+      // document
+      //   .querySelector("form.addBoard")
+      //   .addEventListener("submit", (e) => {
+      //     e.preventDefault(); // form의 submit기능 차단
+
+      //     const title = document.querySelector('input[name="title"]').value;
+      //     const content = document.querySelector(
+      //       'textarea[name="content"]'
+      //     ).value;
+      //     const author = document.querySelector('input[name="author"]').value;
+      //     if (!title || !content || !author) {
+      //       alert("필수값 입력");
+      //       return;
+      //     }
+
+      //     // 서버 프로그램 호출
+      //     fetch("board/board", {
+      //       method: "post",
+      //       headers: { "Content-Type": "application/json;charset=utf-8" },
+      //       body: JSON.stringify({ title, content, author, filename, base64 }),
+      //     })
+      //       .then((resp) => resp.json())
+      //       .then((result) => {
+      //         if (result.retCode == "OK") {
+      //           alert(result.retMsg);
+      //         } else {
+      //           alert(result.retMsg);
+      //         }
+      //       });
+      //   });
+    </script>
+  </body>
+</html>
