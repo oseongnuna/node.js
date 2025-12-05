@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <table border="2">
+      <tbody>
+        <tr>
+          <th>발신</th>
+          <td><input type="email" name="sender" /></td>
+        </tr>
+        <tr>
+          <th>수신</th>
+          <td><input type="email" name="receiver" /></td>
+        </tr>
+        <tr>
+          <th>제목</th>
+          <td><input type="text" name="subject" /></td>
+        </tr>
+        <tr>
+          <th>내용</th>
+          <td><input type="text" name="content" /></td>
+        </tr>
+        <tr>
+          <td colspan="2" align="center">
+            <button onclick="sendMailFunc()">보내기</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <script>
+      function sendMailFunc() {
+        // 입력값
+        const from = document.querySelector('input[name="sender"]').value;
+        const to = document.querySelector('input[name="receiver"]').value;
+        const subject = document.querySelector('input[name="subject"]').value;
+        const text = document.querySelector('input[name="content"]').value;
+        if (!from || !to || !subject || !text) {
+          alert("값을 입력하세요.");
+          return;
+        }
+
+        fetch("/email", {
+          method: "post",
+          headers: { "Content-Type": "application/json;charset=utf-8" },
+          body: JSON.stringify({ from, to, subject, text }),
+        }) //
+          .then((resp) => resp.json())
+          .then((result) => {
+            console.log(result);
+            if (result.receiver) {
+              alert(result.msg);
+            }
+          })
+          .catch(console.log);
+      }
+    </script>
+  </body>
+</html>
